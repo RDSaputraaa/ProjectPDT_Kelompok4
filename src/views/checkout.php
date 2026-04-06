@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,14 +13,14 @@
     <?php require_once 'layouts/sidebar.php'; ?>
 
     <main class="flex-1 overflow-y-auto pr-3 flex flex-col">
-        
+
         <div class="mb-8">
             <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Kasir Peminjaman</h1>
             <p class="text-gray-500 mt-1">Sistem Peminjaman Buku dengan Transaction & Rollback</p>
         </div>
 
         <div class="flex-1">
-            
+
             <?php if (isset($pesan_transaksi) && $pesan_transaksi): ?>
                 <div class="p-4 mb-6 rounded-2xl font-semibold shadow-sm border <?php echo $pesan_transaksi['status'] == 'success' ? 'bg-green-100 border-green-200 text-green-700' : 'bg-red-100 border-red-200 text-red-700'; ?>">
                     <?= $pesan_transaksi['pesan'] ?>
@@ -28,7 +29,7 @@
 
             <div class="bg-white/60 backdrop-blur-xl p-8 rounded-[30px] shadow-sm border border-white/40">
                 <h2 class="text-xl font-bold mb-6 text-gray-800">Simulasi Pinjam Buku</h2>
-                
+
                 <form action="index.php?page=checkout" method="POST" class="flex flex-wrap gap-4 items-end">
                     <div class="flex-1 min-w-[250px] max-w-md">
                         <label class="block text-sm font-semibold text-gray-600 mb-2">ID Buku yang mau dipinjam:</label>
@@ -41,10 +42,11 @@
             </div>
 
         </div>
-        
+
         <?php require_once 'layouts/footer.php'; ?>
-        
+
     </main>
 
 </body>
+
 </html>

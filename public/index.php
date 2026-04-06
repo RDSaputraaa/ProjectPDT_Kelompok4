@@ -29,9 +29,6 @@ switch ($page) {
         require_once '../src/views/operations.php';
         break;
 
-    // JIKA USER MEMBUKA HALAMAN UTAMA (Dashboard / Tugas Kirana)
-    case 'dashboard':
-
     case 'reports':
         require_once '../src/controllers/ReportController.php';
 
@@ -57,12 +54,23 @@ switch ($page) {
         require_once '../src/views/checkout.php';
         break;
 
-
+    // JIKA USER MEMBUKA HALAMAN DASHBOARD
+    case 'dashboard':
     default:
         require_once '../src/controllers/DashboardController.php';
-
-        // $dashController = new DashboardController($pdo);
+        $dashController = new DashboardController($pdo); 
         
+        // --- TAMBAHKAN BLOK INI: Tangkap data form tambah buku ---
+        $pesan_tambah = null;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['judul_buku'])) {
+            $pesan_tambah = $dashController->tambahBuku(
+                $_POST['judul_buku'], 
+                $_POST['stok_buku'], 
+                $_POST['id_kategori']
+            );
+        }
+        // ---------------------------------------------------------
+
         $data_peminjaman = $dashController->getPeminjaman();
 
         require_once '../src/views/dashboard.php';

@@ -46,7 +46,6 @@ $menus = [
             
             <?php foreach ($menus as $key => $menu): ?>
                 <?php
-                // Logika Penentuan Class Active vs Inactive
                 $isActive = ($current_page === $key);
                 
                 $link_class = $isActive 
