@@ -9,21 +9,15 @@ class DashboardController
         $this->db = $pdo;
     }
 
-    // 1. Fungsi bawaan yang sudah ada (mengambil data peminjaman)
-    public function getPeminjaman()
-    {
+    public function getPeminjaman() {
         try {
-            // Hapus JOIN ke tabel buku karena kolom id_buku belum ada
-            $sql = "SELECT p.id_pinjam, a.nama, p.tanggal 
-                    FROM peminjaman p 
-                    JOIN anggota a ON p.id_anggota = a.id_anggota 
-                    ORDER BY p.tanggal DESC";
-
+            // Kita cukup memanggil nama prosedurnya saja!
+            $sql = "CALL TampilPeminjaman()";
+            
             $stmt = $this->db->query($sql);
             return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
         } catch (PDOException $e) {
-            // Tampilkan pesan error di layar agar kita tahu jika ada salah syntax
-            die("Error Database: " . $e->getMessage());
+            die("Error Database: " . $e->getMessage()); 
         }
     }
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +31,7 @@
                 <h2 class="text-xl font-bold mb-6 text-gray-800">Simulasi Pinjam Buku</h2>
 
                 <form action="index.php?page=checkout" method="POST" class="flex flex-wrap gap-4 items-end">
-                    
+
                     <div class="flex-1 min-w-[200px] max-w-sm">
                         <label class="block text-sm font-semibold text-gray-600 mb-2">ID Buku yang dipinjam:</label>
                         <input type="number" name="id_buku" required class="w-full bg-white/80 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition">
@@ -50,9 +51,34 @@
 
         </div>
 
+        <div class="bg-white/60 backdrop-blur-xl p-8 rounded-[30px] shadow-sm border border-red-200 mt-8">
+            <h2 class="text-xl font-bold mb-6 text-red-700 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Hapus Buku
+            </h2>
+
+            <form action="index.php?page=checkout" method="POST" class="flex flex-wrap gap-4 items-end">
+
+                <input type="hidden" name="aksi" value="hapus_buku">
+
+                <div class="flex-1 min-w-[200px] max-w-sm">
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">ID Buku yang akan dihapus:</label>
+                    <input type="number" name="id_buku" required class="w-full bg-white/80 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition">
+                </div>
+
+                <button type="submit" onclick="return confirm('Peringatan: Apakah Anda yakin ingin menghapus buku ini secara permanen?');" class="bg-red-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-600 hover:shadow-lg transition">
+                    Hapus Permanen
+                </button>
+
+            </form>
+        </div>
+
         <?php require_once 'layouts/footer.php'; ?>
 
     </main>
 
 </body>
+
 </html>

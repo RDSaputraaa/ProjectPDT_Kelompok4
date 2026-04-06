@@ -32,11 +32,11 @@ switch ($page) {
         require_once '../src/controllers/ReportController.php';
 
         $reportController = new ReportController($pdo);
-        
+
         $data_inner = $reportController->getInnerJoin();
         $data_left  = $reportController->getLeftJoin();
         $data_view  = $reportController->getView();
-        
+
         require_once '../src/views/reports.php';
         break;
 
@@ -45,31 +45,60 @@ switch ($page) {
         require_once '../src/controllers/TransactionController.php';
 
         $trxController = new TransactionController($pdo);
-
-        // LOGIKA ACHI: Memproses Form Pinjam dengan id_buku DAN id_anggota
         $pesan_transaksi = null;
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_buku']) && isset($_POST['id_anggota'])) {
-            $pesan_transaksi = $trxController->prosesPinjam(
-                $_POST['id_buku'],
-                $_POST['id_anggota']
-            );
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            // CEK 1: Apakah user menekan tombol "Hapus Permanen"?
+            if (isset($_POST['aksi']) && $_POST['aksi'] === 'hapus_buku') {
+                $pesan_transaksi = $trxController->hapusBuku($_POST['id_buku']);
+            }
+
+            // CEK 2: Apakah user menekan tombol "Pinjam Buku"?
+            elseif (isset($_POST['id_buku']) && isset($_POST['id_anggota'])) {
+                $pesan_transaksi = $trxController->prosesPinjam(
+                    $_POST['id_buku'],
+                    $_POST['id_anggota']
+                );
+            }
         }
         
         require_once '../src/views/checkout.php';
+        break;
+
+    // JIKA USER MEMBUKA HALAMAN MATERI DEADLOCK
+    case 'deadlock':
+        require_once '../src/controllers/DeadlockContoller.php';
+
+        $deadlockCtrl = new DeadlockController($pdo);
+
+        // Jika user mengeklik tombol Proses A atau B (Buka di tab baru)
+        if (isset($_GET['proses'])) {
+            if ($_GET['proses'] === 'A') {
+                $deadlockCtrl->prosesA();
+                exit; // Hentikan script agar tidak me-load UI Glassmorphism
+            } elseif ($_GET['proses'] === 'B') {
+                $deadlockCtrl->prosesB();
+                exit;
+            }
+        }
+
+        // Jika tidak menekan tombol, tampilkan UI Halaman Deadlock
+        require_once '../src/views/deadlock.php';
         break;
 
     // JIKA USER MEMBUKA HALAMAN DASHBOARD (ATAU URL TIDAK DIKENAL)
     case 'dashboard':
     default:
         require_once '../src/controllers/DashboardController.php';
-        $dashController = new DashboardController($pdo); 
-        
+        $dashController = new DashboardController($pdo);
+
         // --- Tangkap data form tambah buku (Dari UI Dashboard) ---
         $pesan_tambah = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['judul_buku'])) {
             $pesan_tambah = $dashController->tambahBuku(
-                $_POST['judul_buku'], 
-                $_POST['stok_buku'], 
+                $_POST['judul_buku'],
+                $_POST['stok_buku'],
                 $_POST['id_kategori']
             );
         }
@@ -80,4 +109,3 @@ switch ($page) {
         require_once '../src/views/dashboard.php';
         break;
 }
-?>

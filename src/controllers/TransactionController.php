@@ -71,5 +71,34 @@ class TransactionController {
             ];
         }
     }
+
+    public function hapusBuku($id_buku) {
+        try {
+            // Memanggil Stored Procedure dengan PDO
+            $stmt = $this->pdo->prepare("CALL HapusBuku(?)");
+            $stmt->execute([$id_buku]);
+
+            // Cek apakah ada baris yang terhapus
+            if ($stmt->rowCount() > 0) {
+                return [
+                    'status' => 'success', 
+                    'pesan' => 'Berhasil! Buku telah dihapus dari sistem.'
+                ];
+            } else {
+                return [
+                    'status' => 'error', 
+                    'pesan' => 'Gagal: ID Buku tidak ditemukan.'
+                ];
+            }
+
+        } catch (PDOException $e) {
+            // Error ini biasanya muncul jika buku tersebut MASIH DIPINJAM 
+            // (terhalang oleh aturan Foreign Key dari tabel peminjaman)
+            return [
+                'status' => 'error', 
+                'pesan' => 'Tidak dapat menghapus buku: ' . $e->getMessage()
+            ];
+        }
+    }
 }
 ?>

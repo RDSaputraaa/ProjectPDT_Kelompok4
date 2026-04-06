@@ -24,6 +24,11 @@ $menus = [
         'title' => 'Checkout',
         'url' => 'index.php?page=checkout',
         'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>'
+    ],
+    'deadlock' => [
+        'title' => 'Deadlock',
+        'url' => 'index.php?page=deadlock',
+        'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>'
     ]
 ];
 ?>
@@ -36,7 +41,7 @@ $menus = [
             <span class="w-3 h-3 bg-yellow-400 rounded-full shadow-inner"></span>
             <span class="w-3 h-3 bg-green-500 rounded-full shadow-inner"></span>
         </div>
-        <h1 class="text-3xl font-extrabold text-gray-800 tracking-tighter pl-2">PERPUS</h1>
+        <h1 class="text-3xl font-extrabold text-gray-800 tracking-tighter pl-2">PERPUs</h1>
     </div>
 
     <div class="flex-1 space-y-5">
