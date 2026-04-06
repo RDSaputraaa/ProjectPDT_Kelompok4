@@ -1,5 +1,4 @@
 <?php
-
 // public/index.php
 
 // 1. Panggil koneksi database
@@ -16,7 +15,6 @@ switch ($page) {
     case 'operations':
         require_once '../src/controllers/OperationController.php';
 
-
         $opController = new OperationController($pdo);
 
         // Memanggil secara dinamis (ID Kategori: 3, Nama: Sejarah, Stok Minimal: 5)
@@ -29,6 +27,7 @@ switch ($page) {
         require_once '../src/views/operations.php';
         break;
 
+    // JIKA USER MEMBUKA HALAMAN REPORTS (Tugas Kirana)
     case 'reports':
         require_once '../src/controllers/ReportController.php';
 
@@ -41,26 +40,31 @@ switch ($page) {
         require_once '../src/views/reports.php';
         break;
 
+    // JIKA USER MEMBUKA HALAMAN CHECKOUT
     case 'checkout':
         require_once '../src/controllers/TransactionController.php';
 
         $trxController = new TransactionController($pdo);
 
-        // Proses Form Pinjam jika ada POST
+        // LOGIKA ACHI: Memproses Form Pinjam dengan id_buku DAN id_anggota
         $pesan_transaksi = null;
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_buku'])) {
-            $pesan_transaksi = $trxController->prosesPinjam($_POST['id_buku']);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_buku']) && isset($_POST['id_anggota'])) {
+            $pesan_transaksi = $trxController->prosesPinjam(
+                $_POST['id_buku'],
+                $_POST['id_anggota']
+            );
         }
+        
         require_once '../src/views/checkout.php';
         break;
 
-    // JIKA USER MEMBUKA HALAMAN DASHBOARD
+    // JIKA USER MEMBUKA HALAMAN DASHBOARD (ATAU URL TIDAK DIKENAL)
     case 'dashboard':
     default:
         require_once '../src/controllers/DashboardController.php';
         $dashController = new DashboardController($pdo); 
         
-        // --- TAMBAHKAN BLOK INI: Tangkap data form tambah buku ---
+        // --- Tangkap data form tambah buku (Dari UI Dashboard) ---
         $pesan_tambah = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['judul_buku'])) {
             $pesan_tambah = $dashController->tambahBuku(
@@ -75,7 +79,5 @@ switch ($page) {
 
         require_once '../src/views/dashboard.php';
         break;
-
-    
 }
 ?>

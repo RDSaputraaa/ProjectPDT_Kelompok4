@@ -2,50 +2,73 @@
 // src/controllers/TransactionController.php
 
 class TransactionController {
-    private $db;
+    private $pdo;
 
     public function __construct($pdo) {
-        $this->db = $pdo;
+        $this->pdo = $pdo;
     }
 
-    public function prosesPinjam($id_buku, $id_anggota = 1) {
+    public function prosesPinjam($id_buku, $id_anggota) {
         try {
-            // 1. Mulai Transaksi
-            $this->db->beginTransaction();
+            // Mulai transaksi
+            $this->pdo->beginTransaction();
 
-            // 2. Cek Stok (Gunakan prepared statement & FOR UPDATE)
-            $stmtCek = $this->db->prepare("SELECT stok FROM buku WHERE id_buku = :id_buku FOR UPDATE");
-            $stmtCek->execute([':id_buku' => $id_buku]);
-            $data = $stmtCek->fetch(PDO::FETCH_ASSOC);
+            // Ambil stok + kunci data (Pencegahan bentrok jika dipinjam bersamaan)
+            $stmt = $this->pdo->prepare("SELECT stok FROM buku WHERE id_buku = ? FOR UPDATE");
+            $stmt->execute([$id_buku]);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$data || $data['stok'] <= 0) {
-                $this->db->rollBack();
-                return ['status' => 'error', 'pesan' => 'Transaksi gagal, stok buku habis atau buku tidak ditemukan.'];
+            // Jika buku tidak ditemukan di database
+            if (!$data) {
+                $this->pdo->rollBack();
+                return [
+                    'status' => 'error',
+                    'pesan' => 'Buku tidak ditemukan'
+                ];
             }
 
-            // 3. Kurangi Stok
-            $stmtUpdate = $this->db->prepare("UPDATE buku SET stok = stok - 1 WHERE id_buku = :id_buku");
-            $stmtUpdate->execute([':id_buku' => $id_buku]);
+            // Jika stok masih ada
+            if ($data['stok'] > 0) {
 
-            // 4. Catat Peminjaman
-            $stmtPinjam = $this->db->prepare("INSERT INTO peminjaman (id_anggota, tanggal) VALUES (:id_anggota, CURDATE())");
-            $stmtPinjam->execute([':id_anggota' => $id_anggota]);
-            
-            // Ambil ID pinjam yang baru saja dibuat
-            $id_pinjam = $this->db->lastInsertId();
+                // Kurangi stok
+                $stmt = $this->pdo->prepare("UPDATE buku SET stok = stok - 1 WHERE id_buku = ?");
+                $stmt->execute([$id_buku]);
 
-            // 5. Catat Detail Peminjaman
-            $stmtDetail = $this->db->prepare("INSERT INTO detail_pinjam (id_pinjam, id_buku) VALUES (:id_pinjam, :id_buku)");
-            $stmtDetail->execute([':id_pinjam' => $id_pinjam, ':id_buku' => $id_buku]);
+                // Simpan ke tabel peminjaman utama
+                $stmt = $this->pdo->prepare("INSERT INTO peminjaman (id_anggota, tanggal) VALUES (?, CURDATE())");
+                $stmt->execute([$id_anggota]);
 
-            // 6. Commit Transaksi
-            $this->db->commit();
-            return ['status' => 'success', 'pesan' => 'Transaksi berhasil! Buku telah dipinjam.'];
+                // Ambil ID peminjaman yang baru saja terbuat
+                $id_pinjam = $this->pdo->lastInsertId();
+
+                // Simpan ke tabel relasi detail_pinjam
+                $stmt = $this->pdo->prepare("INSERT INTO detail_pinjam (id_pinjam, id_buku) VALUES (?, ?)");
+                $stmt->execute([$id_pinjam, $id_buku]);
+
+                // Commit transaksi (Simpan permanen semua perubahan di atas)
+                $this->pdo->commit();
+
+                return [
+                    'status' => 'success',
+                    'pesan' => 'Transaksi berhasil, buku berhasil dipinjam'
+                ];
+
+            } else {
+                // Jika stok = 0
+                $this->pdo->rollBack();
+                return [
+                    'status' => 'error',
+                    'pesan' => 'Transaksi gagal, stok buku habis'
+                ];
+            }
 
         } catch (Exception $e) {
-            // 7. Rollback jika ada error MySQL
-            $this->db->rollBack();
-            return ['status' => 'error', 'pesan' => 'Error, transaksi dibatalkan: ' . $e->getMessage()];
+            // Jika terjadi error MySQL (misal database mati atau salah query)
+            $this->pdo->rollBack();
+            return [
+                'status' => 'error',
+                'pesan' => 'Terjadi error: ' . $e->getMessage()
+            ];
         }
     }
 }

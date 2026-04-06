@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,13 +30,21 @@
                 <h2 class="text-xl font-bold mb-6 text-gray-800">Simulasi Pinjam Buku</h2>
 
                 <form action="index.php?page=checkout" method="POST" class="flex flex-wrap gap-4 items-end">
-                    <div class="flex-1 min-w-[250px] max-w-md">
-                        <label class="block text-sm font-semibold text-gray-600 mb-2">ID Buku yang mau dipinjam:</label>
+                    
+                    <div class="flex-1 min-w-[200px] max-w-sm">
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">ID Buku yang dipinjam:</label>
                         <input type="number" name="id_buku" required class="w-full bg-white/80 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition">
                     </div>
+
+                    <div class="flex-1 min-w-[200px] max-w-sm">
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">ID Anggota peminjam:</label>
+                        <input type="number" name="id_anggota" required class="w-full bg-white/80 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition">
+                    </div>
+
                     <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 hover:shadow-lg transition">
                         Pinjam Buku
                     </button>
+
                 </form>
             </div>
 
@@ -48,5 +55,4 @@
     </main>
 
 </body>
-
 </html>
