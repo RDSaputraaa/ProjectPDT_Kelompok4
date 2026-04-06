@@ -1,100 +1,73 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Perpustakaan - Dashboard</title>
-    
-    <link href="assets/css/output.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50 text-gray-800 font-sans flex h-screen overflow-hidden">
+<?php
 
-    <aside class="w-64 bg-slate-900 text-white flex flex-col">
-        <div class="h-16 flex items-center justify-center border-b border-slate-700">
-            <h1 class="text-xl font-bold tracking-wider">📚 E-PERPUS</h1>
-        </div>
-        <nav class="flex-1 px-4 py-6 space-y-2">
-            <a href="#" class="block px-4 py-2.5 bg-blue-600 rounded-lg font-medium transition hover:bg-blue-700">📊 Dashboard</a>
-            <a href="#" class="block px-4 py-2.5 rounded-lg font-medium transition hover:bg-slate-800">📖 Katalog Buku</a>
-            <a href="#" class="block px-4 py-2.5 rounded-lg font-medium transition hover:bg-slate-800">🔄 Transaksi Pinjam</a>
-            <a href="#" class="block px-4 py-2.5 rounded-lg font-medium transition hover:bg-slate-800">👥 Data Anggota</a>
-            <a href="#" class="block px-4 py-2.5 rounded-lg font-medium transition hover:bg-slate-800">📑 Laporan</a>
-        </nav>
-        <div class="p-4 border-t border-slate-700">
-            <button class="w-full px-4 py-2 text-sm text-red-400 border border-red-400 rounded-lg hover:bg-red-500 hover:text-white transition">
-                Logout
-            </button>
-        </div>
-    </aside>
+// public/index.php
 
-    <main class="flex-1 flex flex-col overflow-y-auto">
+// 1. Panggil koneksi database
+require_once '../src/config/database.php';
+
+// 2. Ambil parameter 'page' dari URL (misal: localhost/index.php?page=operations)
+// Jika tidak ada, anggap user membuka halaman 'dashboard'
+$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+
+// 3. Sistem Routing (Pengatur Lalu Lintas)
+switch ($page) {
+
+    // JIKA USER MEMBUKA HALAMAN OPERATIONS (Tugas Kiwi & Achi)
+    case 'operations':
+        require_once '../src/controllers/OperationController.php';
+
+
+        $opController = new OperationController($pdo);
+
+        // Memanggil secara dinamis (ID Kategori: 3, Nama: Sejarah, Stok Minimal: 5)
+        $data_union = $opController->getUnion(3, 'Sejarah', 5);
+        $data_union_all = $opController->getUnionAll(3, 'Sejarah', 5);
+        $data_custom = $opController->getCustomFunction();
+        $data_builtin = $opController->getBuiltInFunction();
+
+        // Tampilkan Tampilan HTML-nya
+        require_once '../src/views/operations.php';
+        break;
+
+    // JIKA USER MEMBUKA HALAMAN UTAMA (Dashboard / Tugas Kirana)
+    case 'dashboard':
+
+    case 'reports':
+        require_once '../src/controllers/ReportController.php';
+
+        $reportController = new ReportController($pdo);
         
-        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-8">
-            <h2 class="text-2xl font-semibold text-gray-700">Dashboard Overview</h2>
-            <div class="flex items-center space-x-4">
-                <span class="text-sm font-medium text-gray-500">Halo, Admin Nafis!</span>
-                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                    N
-                </div>
-            </div>
-        </header>
+        $data_inner = $reportController->getInnerJoin();
+        $data_left  = $reportController->getLeftJoin();
+        $data_view  = $reportController->getView();
+        
+        require_once '../src/views/reports.php';
+        break;
 
-        <div class="p-8">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
-                    <span class="text-gray-500 text-sm font-semibold uppercase">Total Buku</span>
-                    <span class="text-3xl font-bold text-slate-800 mt-2">1,240</span>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
-                    <span class="text-gray-500 text-sm font-semibold uppercase">Total Anggota</span>
-                    <span class="text-3xl font-bold text-blue-600 mt-2">350</span>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
-                    <span class="text-gray-500 text-sm font-semibold uppercase">Sedang Dipinjam</span>
-                    <span class="text-3xl font-bold text-amber-500 mt-2">45</span>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
-                    <span class="text-gray-500 text-sm font-semibold uppercase">Pendapatan Denda</span>
-                    <span class="text-3xl font-bold text-red-500 mt-2">Rp 125K</span>
-                </div>
-            </div>
+    case 'checkout':
+        require_once '../src/controllers/TransactionController.php';
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                    <h3 class="font-bold text-gray-700">Peminjaman Terbaru</h3>
-                    <button class="text-sm text-blue-600 hover:underline">Lihat Semua</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50 text-gray-600 text-sm uppercase">
-                                <th class="px-6 py-3 font-medium">Peminjam</th>
-                                <th class="px-6 py-3 font-medium">Judul Buku</th>
-                                <th class="px-6 py-3 font-medium">Tgl Pinjam</th>
-                                <th class="px-6 py-3 font-medium">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm text-gray-700 divide-y divide-gray-100">
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">Ahmad Budi</td>
-                                <td class="px-6 py-4">Bumi Manusia</td>
-                                <td class="px-6 py-4">04 Apr 2026</td>
-                                <td class="px-6 py-4"><span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-semibold">Dipinjam</span></td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">Siti Aminah</td>
-                                <td class="px-6 py-4">Laskar Pelangi</td>
-                                <td class="px-6 py-4">01 Apr 2026</td>
-                                <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">Dikembalikan</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        $trxController = new TransactionController($pdo);
 
-        </div>
-    </main>
+        // Proses Form Pinjam jika ada POST
+        $pesan_transaksi = null;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_buku'])) {
+            $pesan_transaksi = $trxController->prosesPinjam($_POST['id_buku']);
+        }
+        require_once '../src/views/checkout.php';
+        break;
 
-</body>
-</html>
+
+    default:
+        require_once '../src/controllers/DashboardController.php';
+
+        // $dashController = new DashboardController($pdo);
+        
+        $data_peminjaman = $dashController->getPeminjaman();
+
+        require_once '../src/views/dashboard.php';
+        break;
+
+    
+}
+?>
