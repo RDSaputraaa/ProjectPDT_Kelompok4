@@ -1,0 +1,74 @@
+<?php
+
+class TransactionController {
+    private $pdo;
+
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+    }
+
+    public function prosesPinjam($id_buku, $id_anggota) {
+        try {
+            // Mulai transaksi
+            $this->pdo->beginTransaction();
+
+            // Ambil stok + kunci data
+            $stmt = $this->pdo->prepare("SELECT stok FROM buku WHERE id_buku = ? FOR UPDATE");
+            $stmt->execute([$id_buku]);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Jika buku tidak ditemukan
+            if (!$data) {
+                $this->pdo->rollBack();
+                return [
+                    'status' => 'error',
+                    'pesan' => 'Buku tidak ditemukan'
+                ];
+            }
+
+            // Jika stok masih ada
+            if ($data['stok'] > 0) {
+
+                // Kurangi stok
+                $stmt = $this->pdo->prepare("UPDATE buku SET stok = stok - 1 WHERE id_buku = ?");
+                $stmt->execute([$id_buku]);
+
+                // Simpan ke tabel peminjaman
+                $stmt = $this->pdo->prepare("INSERT INTO peminjaman (id_anggota, tanggal) VALUES (?, CURDATE())");
+                $stmt->execute([$id_anggota]);
+
+                // Ambil ID peminjaman terakhir
+                $id_pinjam = $this->pdo->lastInsertId();
+
+                // Simpan ke detail_pinjam
+                $stmt = $this->pdo->prepare("INSERT INTO detail_pinjam (id_pinjam, id_buku) VALUES (?, ?)");
+                $stmt->execute([$id_pinjam, $id_buku]);
+
+                // Commit transaksi
+                $this->pdo->commit();
+
+                return [
+                    'status' => 'success',
+                    'pesan' => 'Transaksi berhasil, buku berhasil dipinjam'
+                ];
+
+            } else {
+                // Jika stok habis
+                $this->pdo->rollBack();
+                return [
+                    'status' => 'error',
+                    'pesan' => 'Transaksi gagal, stok buku habis'
+                ];
+            }
+
+        } catch (Exception $e) {
+            // Jika error
+            $this->pdo->rollBack();
+            return [
+                'status' => 'error',
+                'pesan' => 'Terjadi error: ' . $e->getMessage()
+            ];
+        }
+    }
+}
+?>
