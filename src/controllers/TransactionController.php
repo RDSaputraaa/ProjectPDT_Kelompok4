@@ -100,5 +100,15 @@ class TransactionController {
             ];
         }
     }
+
+    public function updateStok($id_buku, $stok_baru) {
+        try {
+            $stmt = $this->pdo->prepare("CALL UpdateStokBuku(?, ?)");
+            $stmt->execute([$id_buku, $stok_baru]);
+            return ['status' => 'success', 'pesan' => 'Stok buku berhasil diupdate!'];
+        } catch (PDOException $e) {
+            return ['status' => 'error', 'pesan' => 'Gagal update: ' . $e->getMessage()];
+        }
+    }
 }
 ?>

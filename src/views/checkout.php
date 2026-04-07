@@ -75,6 +75,54 @@
             </form>
         </div>
 
+        <!-- Form UPDATE STOK -->
+        <div class="bg-white/60 backdrop-blur-xl p-8 rounded-[30px] shadow-sm border border-yellow-200 mt-8">
+            <h2 class="text-xl font-bold mb-6 text-yellow-700">Update Stok Buku</h2>
+
+            <?php if (isset($pesan_transaksi) && $pesan_transaksi && 
+                    isset($_POST['aksi']) && $_POST['aksi'] === 'update_stok'): ?>
+                <div class="p-4 mb-6 rounded-2xl font-semibold shadow-sm border 
+                    <?= $pesan_transaksi['status'] == 'success' 
+                        ? 'bg-green-100 border-green-200 text-green-700' 
+                        : 'bg-red-100 border-red-200 text-red-700' ?>">
+                    <?= $pesan_transaksi['pesan'] ?>
+                </div>
+            <?php endif; ?>
+
+            <form action="index.php?page=checkout" method="POST" 
+                class="flex flex-wrap gap-4 items-end">
+
+                <input type="hidden" name="aksi" value="update_stok">
+
+                <div class="flex-1 min-w-[200px] max-w-sm">
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">
+                        ID Buku:
+                    </label>
+                    <input type="number" name="id_buku" required
+                        class="w-full bg-white/80 border border-gray-300 rounded-xl px-4 py-3 
+                            focus:outline-none focus:border-yellow-500 
+                            focus:ring-4 focus:ring-yellow-500/20 transition">
+                </div>
+
+                <div class="flex-1 min-w-[200px] max-w-sm">
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">
+                        Stok Baru:
+                    </label>
+                    <input type="number" name="stok_baru" required min="0"
+                        class="w-full bg-white/80 border border-gray-300 rounded-xl px-4 py-3 
+                            focus:outline-none focus:border-yellow-500 
+                            focus:ring-4 focus:ring-yellow-500/20 transition">
+                </div>
+
+                <button type="submit"
+                    class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold 
+                        hover:bg-blue-700 hover:shadow-lg transition">
+                    Update Stok
+                </button>
+
+            </form>
+        </div>
+
         <?php require_once 'layouts/footer.php'; ?>
 
     </main>

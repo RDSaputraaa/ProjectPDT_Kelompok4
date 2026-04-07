@@ -61,6 +61,14 @@ switch ($page) {
                     $_POST['id_anggota']
                 );
             }
+
+            // Tambahkan ini di dalam case 'checkout', setelah cek hapus_buku
+            elseif (isset($_POST['aksi']) && $_POST['aksi'] === 'update_stok') {
+                $pesan_transaksi = $trxController->updateStok(
+                    $_POST['id_buku'],
+                    $_POST['stok_baru']
+                );
+            }
         }
         
         require_once '../src/views/checkout.php';

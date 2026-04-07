@@ -1,5 +1,6 @@
 <?php
-// src/controllers/DeadlockController.php
+// src/controllers/DeadlockContoller.php
+// (nama file sengaja dibiarkan sama agar tidak perlu ubah require di index.php)
 
 class DeadlockController {
     private $pdo;
@@ -9,48 +10,60 @@ class DeadlockController {
     }
 
     public function prosesA() {
+        echo "<h2 style='font-family:monospace; padding:20px'>";
+        echo "⚙️ <strong>[Proses A] Mulai...</strong><br><br>";
+        
         try {
             $this->pdo->beginTransaction();
-            
-            // Kunci Buku 1
-            $this->pdo->exec("UPDATE buku SET stok = 99 WHERE id_buku = 1");
-            echo "<h3>[Proses A] Berhasil mengunci Buku 1. Menunggu 5 detik...</h3>";
-            
-            // Paksa PHP berhenti 5 detik agar Proses B punya waktu untuk jalan
-            ob_flush(); flush(); 
-            sleep(5); 
-            
-            // Coba Kunci Buku 2
-            echo "<h3>[Proses A] Mencoba mengakses Buku 2...</h3>";
-            $this->pdo->exec("UPDATE buku SET stok = 99 WHERE id_buku = 2");
-            
+
+            // Langkah 1: Kunci tabel BUKU
+            $this->pdo->exec("UPDATE buku SET stok = stok WHERE id_buku = 1");
+            echo "🔒 [Proses A] Berhasil mengunci <strong>Buku id=1</strong><br>";
+            echo "⏳ [Proses A] Menunggu 5 detik sebelum mencoba kunci Anggota...<br>";
+            ob_flush(); flush();
+            sleep(5);
+
+            // Langkah 2: Coba kunci tabel ANGGOTA (yang sudah dikunci Proses B)
+            echo "➡️  [Proses A] Mencoba mengunci <strong>Anggota id=1</strong>...<br>";
+            ob_flush(); flush();
+            $this->pdo->exec("UPDATE anggota SET nama = nama WHERE id_anggota = 1");
+
             $this->pdo->commit();
-            echo "<h3 style='color:green'>[Proses A] Selesai! Tidak ada Deadlock.</h3>";
-            
+            echo "<br>✅ <strong style='color:green'>[Proses A] COMMIT berhasil! Tidak terkena deadlock.</strong>";
+
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            echo "<h3 style='color:red'>[Proses A] GAGAL (Deadlock Terdeteksi): " . $e->getMessage() . "</h3>";
+            echo "<br>❌ <strong style='color:red'>[Proses A] ROLLBACK! Deadlock terdeteksi oleh MySQL.</strong><br>";
+            echo "<small style='color:#666'>Detail: " . $e->getMessage() . "</small>";
         }
+        echo "</h2>";
     }
 
     public function prosesB() {
+        echo "<h2 style='font-family:monospace; padding:20px'>";
+        echo "⚙️ <strong>[Proses B] Mulai...</strong><br><br>";
+
         try {
             $this->pdo->beginTransaction();
-            
-            // Kunci Buku 2
-            $this->pdo->exec("UPDATE buku SET stok = 88 WHERE id_buku = 2");
-            echo "<h3>[Proses B] Berhasil mengunci Buku 2. Mencoba mengakses Buku 1...</h3>";
-            
-            // Langsung coba kunci Buku 1
-            $this->pdo->exec("UPDATE buku SET stok = 88 WHERE id_buku = 1");
-            
+
+            // Langkah 1: Kunci tabel ANGGOTA (berlawanan dengan Proses A)
+            $this->pdo->exec("UPDATE anggota SET nama = nama WHERE id_anggota = 1");
+            echo "🔒 [Proses B] Berhasil mengunci <strong>Anggota id=1</strong><br>";
+            echo "➡️  [Proses B] Langsung mencoba mengunci <strong>Buku id=1</strong>...<br>";
+            ob_flush(); flush();
+
+            // Langkah 2: Coba kunci tabel BUKU (yang sudah dikunci Proses A)
+            $this->pdo->exec("UPDATE buku SET stok = stok WHERE id_buku = 1");
+
             $this->pdo->commit();
-            echo "<h3 style='color:green'>[Proses B] Selesai! Tidak ada Deadlock.</h3>";
-            
+            echo "<br>✅ <strong style='color:green'>[Proses B] COMMIT berhasil! Tidak terkena deadlock.</strong>";
+
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            echo "<h3 style='color:red'>[Proses B] GAGAL (Deadlock Terdeteksi): " . $e->getMessage() . "</h3>";
+            echo "<br>❌ <strong style='color:red'>[Proses B] ROLLBACK! Deadlock terdeteksi oleh MySQL.</strong><br>";
+            echo "<small style='color:#666'>Detail: " . $e->getMessage() . "</small>";
         }
+        echo "</h2>";
     }
 }
 ?>
