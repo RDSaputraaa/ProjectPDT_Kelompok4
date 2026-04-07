@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 03, 2026 at 12:43 PM
--- Server version: 8.0.30
--- PHP Version: 8.1.10
+-- Generation Time: Apr 07, 2026 at 09:05 AM
+-- Server version: 8.4.3
+-- PHP Version: 8.3.16
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -25,9 +25,27 @@ DELIMITER $$
 --
 -- Procedures
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `HapusBuku` (IN `p_id` INT)   BEGIN
+    DELETE FROM detail_pinjam WHERE id_buku = p_id;
+    DELETE FROM buku WHERE id_buku = p_id;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tambah_buku` (IN `judul_buku` VARCHAR(100), IN `stok_buku` INT, IN `id_kat` INT)   BEGIN
     INSERT INTO buku (judul, stok, id_kategori)
     VALUES (judul_buku, stok_buku, id_kat);
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `TampilPeminjaman` ()   BEGIN
+    SELECT p.id_pinjam, a.nama, b.judul, p.tanggal
+    FROM peminjaman p
+    JOIN anggota a ON p.id_anggota = a.id_anggota
+    JOIN detail_pinjam dp ON p.id_pinjam = dp.id_pinjam
+    JOIN buku b ON dp.id_buku = b.id_buku
+    ORDER BY p.tanggal DESC;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateStokBuku` (IN `p_id` INT, IN `p_stok_baru` INT)   BEGIN
+    UPDATE buku SET stok = p_stok_baru WHERE id_buku = p_id;
 END$$
 
 --
@@ -90,7 +108,7 @@ CREATE TABLE `buku` (
 --
 
 INSERT INTO `buku` (`id_buku`, `judul`, `stok`, `id_kategori`) VALUES
-(1, 'Laskar Pelangi', 4, 1),
+(1, 'Laskar Pelangi', 10, 1),
 (2, 'Bumi', 6, 1),
 (3, 'Dilan 1990', 4, 1),
 (4, 'Belajar SQL Dasar', 3, 2),
@@ -196,19 +214,10 @@ INSERT INTO `peminjaman` (`id_pinjam`, `id_anggota`, `tanggal`) VALUES
 --
 CREATE TABLE `view_peminjaman` (
 `id_pinjam` int
-,`nama_anggota` varchar(100)
 ,`judul` varchar(100)
+,`nama_anggota` varchar(100)
 ,`tanggal` date
 );
-
--- --------------------------------------------------------
-
---
--- Structure for view `view_peminjaman`
---
-DROP TABLE IF EXISTS `view_peminjaman`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_peminjaman`  AS SELECT `p`.`id_pinjam` AS `id_pinjam`, `a`.`nama` AS `nama_anggota`, `b`.`judul` AS `judul`, `p`.`tanggal` AS `tanggal` FROM (((`peminjaman` `p` join `anggota` `a` on((`p`.`id_anggota` = `a`.`id_anggota`))) join `detail_pinjam` `d` on((`p`.`id_pinjam` = `d`.`id_pinjam`))) join `buku` `b` on((`d`.`id_buku` = `b`.`id_buku`)))  ;
 
 --
 -- Indexes for dumped tables
@@ -281,6 +290,15 @@ ALTER TABLE `kategori`
 --
 ALTER TABLE `peminjaman`
   MODIFY `id_pinjam` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `view_peminjaman`
+--
+DROP TABLE IF EXISTS `view_peminjaman`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_peminjaman`  AS SELECT `p`.`id_pinjam` AS `id_pinjam`, `a`.`nama` AS `nama_anggota`, `b`.`judul` AS `judul`, `p`.`tanggal` AS `tanggal` FROM (((`peminjaman` `p` join `anggota` `a` on((`p`.`id_anggota` = `a`.`id_anggota`))) join `detail_pinjam` `d` on((`p`.`id_pinjam` = `d`.`id_pinjam`))) join `buku` `b` on((`d`.`id_buku` = `b`.`id_buku`))) ;
 
 --
 -- Constraints for dumped tables
